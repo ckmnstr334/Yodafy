@@ -1,29 +1,29 @@
-import openai
+from openai import OpenAI
 import time
 import streamlit as st
 
 
 def ask_assistant(question):
 
-    openai.api_key = st.secrets["openai"]["api_key"]
+    OpenAI.api_key = st.secrets["openai"]["api_key"]
     assistant_id = "asst_G4dQNm038kcoM9RcgfG9ZtVo"
 
-    thread = openai.beta.threads.create() 
+    thread = OpenAI.beta.threads.create() 
     thread_id=thread.id
 
-    openai.beta.threads.messages.create(
+    OpenAI.beta.threads.messages.create(
         thread_id=thread_id,
         role="user",
         content=question,
     )
 
-    run = openai.beta.threads.runs.create(
+    run = OpenAI.beta.threads.runs.create(
             thread_id=thread_id,
             assistant_id=assistant_id,
         )
 
     while True:
-            run_status = openai.beta.threads.runs.retrieve(thread_id=thread_id, run_id=run.id)
+            run_status = OpenAI.beta.threads.runs.retrieve(thread_id=thread_id, run_id=run.id)
             if run_status.status == "completed":
                 break
             elif run_status.status in ["failed", "cancelled"]:
@@ -31,7 +31,7 @@ def ask_assistant(question):
             time.sleep(1)
 
 
-    messages = openai.beta.threads.messages.list(thread_id=thread_id)
+    messages = OpenAI.beta.threads.messages.list(thread_id=thread_id)
         
     for msg in reversed(messages.data):  # messages are in reverse order
         if msg.role == "assistant":
